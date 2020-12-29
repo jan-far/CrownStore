@@ -16,6 +16,7 @@ import {
 import { Component } from 'react';
 import { connect } from 'react-redux';
 import { setCurrentUser } from './Redux/user/user.action';
+import CheckOutPage from './pages/Checkout';
 
 class App extends Component {
   unsubscribeFromAuth = null;
@@ -52,6 +53,9 @@ class App extends Component {
           </Switch>
           <Switch>
             <Route exact path="/shop" component={ShopPage} />
+          </Switch>
+          <Switch>
+            <Route exact path='/checkout' component={CheckOutPage} />
           </Switch>
           <Switch>
             <Route
