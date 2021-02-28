@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import './App.css';
 import HomePage from './pages/Homepage';
 import {
@@ -9,79 +10,48 @@ import {
 import ShopPage from './pages/Shop';
 import Header from './Components/Header';
 import SignInAndSignUpPage from './pages/SignIn and SignUp';
-import {
-  auth,
-  createUserProfileDocument,
-} from './Components/firebase/firebase.utils';
-import { Component } from 'react';
 import { connect } from 'react-redux';
-import { setCurrentUser } from './Redux/user/user.action';
 import CheckOutPage from './pages/Checkout';
+import { checkUserSession } from './Redux/user/user.action';
 
-class App extends Component {
-  unsubscribeFromAuth = null;
+const App = ({ checkUserSession, currentUser }) => {
+  useEffect(() => {
+    checkUserSession();
+  }, [checkUserSession]);
 
-  componentDidMount() {
-    const { setCurrentUser } = this.props;
-    this.unsubscribeFromAuth = auth.onAuthStateChanged(async (userAuth) => {
-      if (userAuth) {
-        const userRef = await createUserProfileDocument(userAuth);
-
-        userRef.onSnapshot((snapshot) => {
-          setCurrentUser({
-            id: snapshot.id,
-            ...snapshot.data(),
-          });
-        });
-      }
-
-      setCurrentUser(userAuth);
-    });
-  }
-
-  componentWillUnmount() {
-    this.unsubscribeFromAuth();
-  }
-
-  render() {
-    return (
-      <>
-        <Router>
-          <Header />
-          <Switch>
-            <Route exact path="/" component={HomePage} />
-          </Switch>
-          <Switch>
-            <Route path="/shop" component={ShopPage} />
-          </Switch>
-          <Switch>
-            <Route exact path='/checkout' component={CheckOutPage} />
-          </Switch>
-          <Switch>
-            <Route
-              exact
-              path="/signin"
-              render={() =>
-                this.props.currentUser ? (
-                  <Redirect to="/" /> 
-                ) : (
-                  <SignInAndSignUpPage />
-                )
-              }
-            />
-          </Switch>
-        </Router>
-      </>
-    );
-  }
-}
+  return (
+    <>
+      <Router>
+        <Header />
+        <Switch>
+          <Route exact path="/" component={HomePage} />
+        </Switch>
+        <Switch>
+          <Route path="/shop" component={ShopPage} />
+        </Switch>
+        <Switch>
+          <Route exact path="/checkout" component={CheckOutPage} />
+        </Switch>
+        <Switch>
+          <Route
+            exact
+            path="/signin"
+            render={() =>
+              currentUser ? <Redirect to="/" /> : <SignInAndSignUpPage />
+            }
+          />
+        </Switch>
+      </Router>
+    </>
+  );
+};
 
 const mapStateToProps = ({ user }) => ({
-  currentUser: user.currentUser
+  currentUser: user.currentUser,
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  setCurrentUser: (user) => dispatch(setCurrentUser(user)),
+  checkUserSession: () => dispatch(checkUserSession()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
